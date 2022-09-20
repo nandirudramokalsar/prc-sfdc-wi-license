@@ -1,0 +1,49 @@
+#%RAML 1.0 DataType
+
+description: |
+  A response to reflect exception thrown by API. 
+type: object
+properties:   
+  success:
+    type: boolean
+    required: true
+    example: true
+  apiName:
+    type: string
+  version:
+    type: string
+  correlationId:
+    description: Unique correlationId of a transaction. Defaulted to timestamp of error thrown if not present.
+    type: string
+    required: true
+    example: "665c440a-115a-4158-96a9-7b3c251c8d33"
+  timestamp:
+    type: string
+  errorDetails: 
+      type: array
+      items: 
+        type: object
+        properties:
+          code:
+            description: The HTTP status code or error code for the operation. For instance 404 if the resource is not found.
+            type: integer
+            required: true
+            example: 404
+          errorType:
+            description: Type of error thrown. Generally this will be in format of Mulesoft ErrorTypeNamespace:ErrorTypeIdentifier.
+            type: string
+            required: true
+            example: "MULE:UNKNOWN"
+          flow:
+            description: The name of the flow that was executing before the error occured.
+            type: string
+            required: false
+          message:
+            description: A human-readable explanation specific to this occurrence of the error.
+            type: string
+            required: true
+            example: "HTTP GET on resource XXX failed"
+          additionalInfo:
+            description: errors from other API layers or additional information
+            type: string
+            required: true  

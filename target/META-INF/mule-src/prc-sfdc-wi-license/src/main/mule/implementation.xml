@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<sub-flow name="route-processing" doc:id="7cce864d-5eba-44c6-a1ee-3daacef821ab" >
+		<logger level="INFO" doc:name="in progress logger" doc:id="73506980-c70d-4de3-86b0-bb5bdf8190e8" message='#[%dw 2.0&#10;import modules::jsonlogger&#10;output application/json&#10;---&#10;jsonlogger::main(payload: {&#10;	"status": "In-progress",&#10;	"uuid": vars.uuid,&#10;	"message": vars.routeToSystem,&#10;	"maskFields": [],&#10;	"appName": app.name,&#10;	"ip": server.ip,&#10;	"flowName": flow.name&#10;})]'/>
+		<choice doc:name="Route to ?" doc:id="89efa623-e75b-4bde-9fe4-33ac8cbbc872" >
+			<when expression='#["dot" ~= vars.routeToSystem]'>
+				<http:request method="POST" doc:name="DOT SYS API" doc:id="30fef68a-0056-4165-9e02-fb3877b015d8" config-ref="HTTPS_request_configuration" url="#[Mule::p('target.dot.host')]" responseTimeout="#[Mule::p('target.dot.respTimeout')]">
+					<http:headers ><![CDATA[#[output application/java
+---
+{
+	"client_secret" : Mule::p('secure::target.dot.client-secret'),
+	"uuid" : vars.uuid,
+	"client_id" : Mule::p('target.dot.client-id')
+}]]]></http:headers>
+				</http:request>
+			</when>
+			<when expression='#["eibs" ~= vars.routeToSystem]'>
+				<http:request method="POST" doc:name="EIBS SYS API" doc:id="db0d7107-549a-4b64-994f-31efa492549d" config-ref="HTTPS_request_configuration" url="#[Mule::p('target.eibs.host')]" responseTimeout="#[Mule::p('target.eibs.respTimeout')]">
+					<http:headers ><![CDATA[#[output application/java
+---
+{
+	"client_secret" : Mule::p('secure::target.eibs.client-secret'),
+	"uuid" : vars.uuid,
+	"client_id" : Mule::p('target.eibs.client-id')
+}]]]></http:headers>
+				</http:request>
+			</when>
+			<when expression='#["oci-num" ~= vars.routeToSystem]'>
+				<http:request method="POST" doc:name="OCI CRED SYS  API" doc:id="84586e67-3975-45dd-9e10-2b6f319c2d81" config-ref="HTTPS_request_configuration" url="#[Mule::p('target.oci-num.host')]" responseTimeout="#[Mule::p('target.oci-num.respTimeout')]">
+					<http:headers ><![CDATA[#[output application/java
+---
+{
+	"client_secret" : Mule::p('secure::target.oci-num.client-secret'),
+	"uuid" : vars.uuid,
+	"client_id" : Mule::p('target.oci-num.client-id')
+}]]]></http:headers>
+				</http:request>
+			</when>
+			<when expression='#["oci-name" ~= vars.routeToSystem]'>
+				<http:request method="POST" doc:name="OCI CRED SYS  API" doc:id="57b7e387-f7e9-432a-91e4-e27c2e0643ff" config-ref="HTTPS_request_configuration" url="#[Mule::p('target.oci-name.host')]" responseTimeout="#[Mule::p('target.oci-name.respTimeout')]" >
+					<http:headers ><![CDATA[#[output application/java
+---
+{
+	"client_secret" : Mule::p('secure::target.oci-name.client-secret'),
+	"uuid" : vars.uuid,
+	"client_id" : Mule::p('target.oci-name.client-id')
+}]]]></http:headers>
+				</http:request>
+			</when>
+			<otherwise >
+				<raise-error doc:name="Raise error" doc:id="01ee93b9-792f-4674-9518-c7e10f1d5683" type="UNKNOWN:ROUTE" description="Please check the route conditions for appropriate request routing"/>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="flow end logger" doc:id="9f93c45c-6bb6-4824-a4e2-43f6c7c6d963" message='#[%dw 2.0&#10;import modules::jsonlogger&#10;output application/json&#10;---&#10;jsonlogger::main(payload: {&#10;	"status": "Ended",&#10;	"uuid": vars.uuid,&#10;	"message": vars.routeToSystem,&#10;	"maskFields": [],&#10;	"appName": app.name,&#10;	"ip": server.ip,&#10;	"flowName": flow.name&#10;})]'/>
+	</sub-flow>
+</mule>

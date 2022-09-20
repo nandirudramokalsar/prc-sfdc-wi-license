@@ -1,0 +1,20 @@
+api:
+  id: "17762291"
+  
+target:
+  dot: 
+    host: "https://uat-sys-sfdc-wi-license-v1.us-e2.cloudhub.io/api/dot-lic-cred-info"
+    client-id: "d0ed717644e44f54a55eaf16a946cf27"
+    respTimeout: "60000"
+  eibs:
+    host: "https://uat-sys-sfdc-wi-license-v1.us-e2.cloudhub.io/api/eibs-lic-cred-info"
+    client-id: "d0ed717644e44f54a55eaf16a946cf27"
+    respTimeout: "60000"
+  oci-name:
+    host: "https://uat-sys-sfdc-wi-license-v1.us-e2.cloudhub.io/api/oci-license-by-name"
+    client-id: "d0ed717644e44f54a55eaf16a946cf27"
+    respTimeout: "60000"
+  oci-num:
+    host: "https://uat-sys-sfdc-wi-license-v1.us-e2.cloudhub.io/api/oci-license-by-number"
+    client-id: "d0ed717644e44f54a55eaf16a946cf27"
+    respTimeout: "60000"

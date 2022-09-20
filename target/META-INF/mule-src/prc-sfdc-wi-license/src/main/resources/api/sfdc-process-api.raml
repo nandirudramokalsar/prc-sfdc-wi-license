@@ -1,0 +1,65 @@
+#%RAML 1.0
+title: SFDC Process API
+description: Retrieve data from SFDC 
+version: v1
+mediaType: [application/json]
+protocols: 
+  - HTTPS  
+  - HTTP
+
+#API Security 
+securitySchemes:
+  securityHeader: !include exchange_modules/cf0698d0-851c-4b5c-aa1a-ee6aa9f0172a/http-security-scheme/1.0.0/httpSecurityScheme.raml
+securedBy:
+  - securityHeader
+
+traits:
+  errorResponseTrait: !include exchange_modules/cf0698d0-851c-4b5c-aa1a-ee6aa9f0172a/http-errors-trait/1.0.0/http-errors-trait.raml
+  httpResponseTrait: !include exchange_modules/cf0698d0-851c-4b5c-aa1a-ee6aa9f0172a/http-response-trait/1.0.0/httpResponse.raml
+  httpRequestTrait: !include exchange_modules/cf0698d0-851c-4b5c-aa1a-ee6aa9f0172a/http-request-trait/1.0.0/httpRequest.raml
+
+types:
+  eibsResp: !include dataTypes/eIBSResponse.raml
+  errorResponse: !include dataTypes/error.raml
+  eibsReq: !include dataTypes/eIBSRequest.raml
+  dotResp: !include dataTypes/DOTResponse.raml
+  dotReq: !include dataTypes/DOTRequest.raml
+  ociReqCred: !include dataTypes/OCIRequestCred.raml
+  ociReqPII: !include dataTypes/OCIRequestPII.raml
+  ociResp: !include dataTypes/OCIResponse.raml
+
+/eibs-lic-cred-info: 
+  post:
+    displayName: Get License Credential Information 
+    description: Retrieve license credential information from salesforce based on query
+    is:
+      - httpRequestTrait:  {requestType: eibsReq}
+      - httpResponseTrait:  {responseObject: eibsResp}
+      - errorResponseTrait:  {problemType: errorResponse}
+
+/dot-lic-cred-info:
+  post:
+    displayName: Get License Credential Information 
+    description: Retrieve license credential information from salesforce based on query
+    is:
+      - httpRequestTrait:  {requestType: dotReq}
+      - httpResponseTrait:  {responseObject: dotResp}
+      - errorResponseTrait:  {problemType: errorResponse}
+
+/oci-license-by-number: 
+  post:
+    displayName: Get License Credential Information 
+    description: Retrieve license credential information from salesforce based on query
+    is:
+      - httpRequestTrait:  {requestType: ociReqCred}
+      - httpResponseTrait:  {responseObject: ociResp}
+      - errorResponseTrait:  {problemType: errorResponse} 
+
+/oci-license-by-name: 
+  post:
+    displayName: Get License Credential Information 
+    description: Retrieve license credential information from salesforce based on query
+    is:
+      - httpRequestTrait:  {requestType: ociReqPII}
+      - httpResponseTrait:  {responseObject: ociResp}
+      - errorResponseTrait:  {problemType: errorResponse} 

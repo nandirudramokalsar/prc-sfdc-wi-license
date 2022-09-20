@@ -1,0 +1,23 @@
+#%RAML 1.0 DataType
+type: object
+properties:
+  statusCode:
+    type: number
+    example: 500
+    required: true
+  errorType:
+    type: string
+    example: "MULE:EXPRESSION"
+    required: true
+  message:
+    type: string
+    example: "Dataweave Failure"
+    required: true
+  appName:
+    type: string
+    example: "sys-dept-of-revenue"
+    required: true
+  uuid:
+    type: string
+    example: "asdasd-asd-as-d-asd-as-d"
+    required: true

@@ -1,0 +1,59 @@
+{
+  "configs": [
+    "global-config.xml",
+    "implementation.xml",
+    "sfdc-process-api.xml"
+  ],
+  "secureProperties": [
+    "mule.key",
+    "anypoint.platform.client_id",
+    "anypoint.platform.client_secret"
+  ],
+  "redeploymentEnabled": true,
+  "name": "com.widsps:prc-sfdc-wi-license:1.0.0",
+  "minMuleVersion": "4.4.0",
+  "requiredProduct": "MULE_EE",
+  "classLoaderModelLoaderDescriptor": {
+    "id": "mule",
+    "attributes": {
+      "exportedPackages": [],
+      "exportedResources": [
+        "api/dataTypes/DOTRequest.raml",
+        "api/dataTypes/DOTResponse.raml",
+        "api/dataTypes/eIBSRequest.raml",
+        "api/dataTypes/eIBSResponse.raml",
+        "api/dataTypes/error.raml",
+        "api/dataTypes/OCIRequestCred.raml",
+        "api/dataTypes/OCIRequestPII.raml",
+        "api/dataTypes/OCIResponse.raml",
+        "api/exchange_modules/cf0698d0-851c-4b5c-aa1a-ee6aa9f0172a/error-data-types/1.0.0/error-data-types.raml",
+        "api/exchange_modules/cf0698d0-851c-4b5c-aa1a-ee6aa9f0172a/http-errors-trait/1.0.0/http-errors-trait.raml",
+        "api/exchange_modules/cf0698d0-851c-4b5c-aa1a-ee6aa9f0172a/http-request-trait/1.0.0/httpRequest.raml",
+        "api/exchange_modules/cf0698d0-851c-4b5c-aa1a-ee6aa9f0172a/http-response-trait/1.0.0/httpResponse.raml",
+        "api/exchange_modules/cf0698d0-851c-4b5c-aa1a-ee6aa9f0172a/http-security-scheme/1.0.0/httpSecurityScheme.raml",
+        "api/sfdc-process-api.raml",
+        "application-types.xml",
+        "global-config.xml",
+        "implementation.xml",
+        "keystore/client-truststore.jks",
+        "keystore/server-keystore.jks",
+        "log4j2.xml",
+        "modules/jsonlogger.dwl",
+        "properties/config-common.yaml",
+        "properties/config-dev.yaml",
+        "properties/config-prod.yaml",
+        "properties/config-qa.yaml",
+        "properties/config-secure-dev.yaml",
+        "properties/config-secure-prod.yaml",
+        "properties/config-secure-qa.yaml",
+        "properties/config-secure-uat.yaml",
+        "properties/config-uat.yaml",
+        "sfdc-process-api.xml"
+      ]
+    }
+  },
+  "bundleDescriptorLoader": {
+    "id": "mule",
+    "attributes": {}
+  }
+}

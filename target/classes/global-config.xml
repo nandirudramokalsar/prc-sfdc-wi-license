@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:sftp="http://www.mulesoft.org/schema/mule/sftp" xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sftp/current/mule-sftp.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+	<http:listener-config name="main-api-https-listener-config">
+        <http:listener-connection host="0.0.0.0" port="${https.port}" protocol="HTTPS">
+			<tls:context >
+				<tls:key-store type="jks" path="keystore/server-keystore.jks" keyPassword="${secure::keystore.password}" password="${secure::keystore.password}" />
+			</tls:context>
+		</http:listener-connection>
+    </http:listener-config>
+    <apikit:config name="sfdc-process-api-config" api="sfdc-process-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+	<configuration-properties doc:name="Common_Properties_Config" doc:id="42967224-cbea-42b6-9785-5c73b923f822" file="properties/config-common.yaml" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="f7819655-c4cf-4c56-8f93-b8adaeb14002" file="properties/config-secure-${mule.env}.yaml" key="${mule.key}" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<configuration-properties doc:name="Environment_Properties_Config" doc:id="cdefefd4-dc91-457a-8c03-e8a14f53577d" file="properties/config-${mule.env}.yaml" />
+	<configuration doc:name="Global_Error_Handler_Configuration" doc:id="cc9333fe-323e-4ad8-bba9-56993a4b5050" defaultErrorHandler-ref="global-error-handling" />
+	<http:request-config name="HTTPS_request_configuration" doc:name="HTTP Request configuration" doc:id="383a78eb-e2b9-4ccf-8ab7-eebf90e2300a" >
+		<http:request-connection protocol="HTTPS" >
+			<tls:context >
+				<tls:trust-store path="keystore/client-truststore.jks" password="${secure::keystore.password}" type="jks" insecure="true" />
+			</tls:context>
+		</http:request-connection>
+	</http:request-config>
+	<api-gateway:autodiscovery apiId="${api.id}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="1bb37654-973c-462b-8c21-d205907ee1b9" flowRef="sfdc-process-api-main" />
+	<error-handler name="global-error-handling" doc:id="f5136967-bc61-4940-9fbd-e923a332947d" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="2d80f7ce-b48e-4de4-890d-7d611aadb1b6" type="ANY">
+			<set-variable value="#[output application/java --- 500]" doc:name="httpStatus" doc:id="ccc54397-a9a9-413b-8dbf-0976638d1f4e" variableName="httpStatus" />
+			<flow-ref doc:name="error-response" doc:id="ca9c2106-493b-4a3c-8db6-d1241c012a3e" name="error-response" />
+		</on-error-propagate>
+	</error-handler>
+	<sub-flow name="error-response" doc:id="a54e341f-acc0-4e29-8ec6-85eb699583fe" >
+		<ee:transform doc:name="error payload" doc:id="b7e027f2-cfdd-4fb0-b5f1-8f3866625a34" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+if(error.errorMessage.payload != null) error.errorMessage.payload
+else {
+    statusCode: vars.httpStatus,
+    errorType: error.errorType.asString,
+    message: if(error.errorType.asString ~= "MULE:EXPRESSION") "DataWeave Failure" else error.description,    
+    appName: app.name,
+    uuid: vars.uuid
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Log Error Payload" doc:id="3878bf6f-444b-46ca-8aee-a3e2988a6caf" message='#[%dw 2.0&#10;import modules::jsonlogger&#10;output application/json&#10;---&#10;jsonlogger::main(payload: {&#10;	"status": "Error",&#10;	"uuid": vars.uuid,&#10;	"message": payload,&#10;	"maskFields": [],&#10;	"appName": app.name,&#10;	"ip": server.ip,&#10;	"flowName": flow.name&#10;})]'/>
+	</sub-flow>
+</mule>

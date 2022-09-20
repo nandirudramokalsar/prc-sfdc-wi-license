@@ -1,0 +1,203 @@
+trigger: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+- group: deployment-variable-group
+- group: nexus-repository-variable-group
+- group: maven-cache-variable-group
+- group: build-variable-group-dev
+- group: build-variable-group-qa
+- group: build-variable-group-uat
+- group: build-variable-group-prod
+- group: deployment-variable-group-prod
+
+
+stages:
+  - stage: CI
+    jobs:
+      - job:
+        displayName: Test
+        steps:
+        - task: Cache@2
+          displayName: 'Cache Maven Local Repo'
+          inputs:
+            key: 'mulesoft-devops-process'
+            path: $(MAVEN_CACHE_FOLDER)
+        - task: DownloadSecureFile@1
+          displayName: 'Download secure file'
+          name: settings
+          inputs:
+            secureFile: 'settings.xml'
+        - task: Maven@3
+          displayName: 'Test Phase'
+          condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/development'))
+          inputs:
+            mavenPomFile: 'pom.xml'
+            publishJUnitResults: true
+            testResultsFiles: '**/surefire-reports/TEST-*.xml'
+            mavenOptions: '-Xmx3072m'
+            javaHomeOption: 'JDKVersion'
+            jdkVersionOption: '1.8'
+            jdkArchitectureOption: 'x64'
+            goals: 'clean test -s $(settings.secureFilePath) $(MAVEN_OPTS)  -Dnexus.username=$(NEXUS_USERNAME) -Dnexus.password=$(NEXUS_PASSWORD) -Dmule.env=$(MULE_ENV_DEV) -Dmule.key=$(ENCRYPTION_KEY_DEV)'
+        - task: Maven@3
+          displayName: 'Package Phase'
+          condition: succeeded()
+          inputs:
+            mavenPomFile: 'pom.xml'
+            publishJUnitResults: false
+            mavenOptions: '-Xmx3072m'
+            javaHomeOption: 'JDKVersion'
+            jdkVersionOption: '1.8'
+            jdkArchitectureOption: 'x64'
+            goals: 'clean package -DskipTests -s $(settings.secureFilePath) $(MAVEN_OPTS)'
+
+
+  - stage: Deploy_To_Dev
+    dependsOn: CI
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/development'))
+    displayName: Deploy To Dev
+    jobs:
+      - deployment: CD
+        displayName: Deploy
+        environment: DEV
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - task: Cache@2
+                  displayName: 'Cache Maven Local Repo'
+                  inputs:
+                    key: 'mulesoft-devops-process'
+                    path: $(MAVEN_CACHE_FOLDER)
+                - task: DownloadSecureFile@1
+                  displayName: 'Download secure file'
+                  name: settings
+                  inputs:
+                    secureFile: 'settings.xml'
+                - task: Maven@3
+                  displayName: 'Deploy To Development'
+                  condition: succeeded()
+                  inputs:
+                    mavenPomFile: 'pom.xml'
+                    publishJUnitResults: true
+                    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+                    mavenOptions: '-Xmx3072m'
+                    javaHomeOption: 'JDKVersion'
+                    jdkVersionOption: '1.8'
+                    jdkArchitectureOption: 'x64'
+                    goals: 'clean package deploy -DmuleDeploy -DskipTests -s $(settings.secureFilePath) $(MAVEN_OPTS) -Dnexus.username=$(NEXUS_USERNAME) -Dnexus.password=$(NEXUS_PASSWORD) -Danypoint.username=$(ANYPOINT_USERNAME) -Danypoint.password=$(ANYPOINT_PASSWORD) -DbusinessGroupId=$(BUSINESS_GROUP_ID) -Denvironment=$(ENVIRONMENT_DEV) -Dregion=$(REGION_DEV) -Dworkers=$(WORKERS_DEV) -DworkerType=$(WORKERTYPE_DEV) -Danypoint.platform.client_id=$(CLIENT_ID_DEV) -Danypoint.platform.client_secret=$(CLIENT_SECRET_DEV) -Dmule.env=$(MULE_ENV_DEV) -Dmule.key=$(ENCRYPTION_KEY_DEV)'
+
+
+  - stage: Deploy_To_QA
+    dependsOn: CI
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/qa'))
+    displayName: Deploy To QA
+    jobs:
+      - deployment: CD
+        displayName: Deploy
+        environment: QA
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - task: Cache@2
+                  displayName: 'Cache Maven Local Repo'
+                  inputs:
+                    key: 'mulesoft-devops-process'
+                    path: $(MAVEN_CACHE_FOLDER)
+                - task: DownloadSecureFile@1
+                  displayName: 'Download secure file'
+                  name: settings
+                  inputs:
+                    secureFile: 'settings.xml'
+                - task: Maven@3
+                  displayName: 'Deploy To QA'
+                  condition: succeeded()
+                  inputs:
+                    mavenPomFile: 'pom.xml'
+                    publishJUnitResults: true
+                    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+                    mavenOptions: '-Xmx3072m'
+                    javaHomeOption: 'JDKVersion'
+                    jdkVersionOption: '1.8'
+                    jdkArchitectureOption: 'x64'
+                    goals: 'clean package deploy -DmuleDeploy -DskipTests -s $(settings.secureFilePath) $(MAVEN_OPTS) -Dnexus.username=$(NEXUS_USERNAME) -Dnexus.password=$(NEXUS_PASSWORD) -Danypoint.username=$(ANYPOINT_USERNAME) -Danypoint.password=$(ANYPOINT_PASSWORD) -DbusinessGroupId=$(BUSINESS_GROUP_ID) -Denvironment=$(ENVIRONMENT_QA) -Dregion=$(REGION_QA) -Dworkers=$(WORKERS_QA) -DworkerType=$(WORKERTYPE_QA) -Danypoint.platform.client_id=$(CLIENT_ID_QA) -Danypoint.platform.client_secret=$(CLIENT_SECRET_QA) -Dmule.env=$(MULE_ENV_QA) -Dmule.key=$(ENCRYPTION_KEY_QA)'
+
+
+  - stage: Deploy_To_UAT
+    dependsOn: CI
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/uat'))
+    displayName: Deploy To UAT
+    jobs:
+      - deployment: CD
+        displayName: Deploy
+        environment: UAT
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - task: Cache@2
+                  displayName: 'Cache Maven Local Repo'
+                  inputs:
+                    key: 'mulesoft-devops-process'
+                    path: $(MAVEN_CACHE_FOLDER)
+                - task: DownloadSecureFile@1
+                  displayName: 'Download secure file'
+                  name: settings
+                  inputs:
+                    secureFile: 'settings.xml'
+                - task: Maven@3
+                  displayName: 'Deploy To UAT'
+                  condition: succeeded()
+                  inputs:
+                    mavenPomFile: 'pom.xml'
+                    publishJUnitResults: true
+                    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+                    mavenOptions: '-Xmx3072m'
+                    javaHomeOption: 'JDKVersion'
+                    jdkVersionOption: '1.8'
+                    jdkArchitectureOption: 'x64'
+                    goals: 'clean package deploy -DmuleDeploy -DskipTests -s $(settings.secureFilePath) $(MAVEN_OPTS) -Dnexus.username=$(NEXUS_USERNAME) -Dnexus.password=$(NEXUS_PASSWORD) -Danypoint.username=$(ANYPOINT_USERNAME) -Danypoint.password=$(ANYPOINT_PASSWORD) -DbusinessGroupId=$(BUSINESS_GROUP_ID) -Denvironment=$(ENVIRONMENT_UAT) -Dregion=$(REGION_UAT) -Dworkers=$(WORKERS_UAT) -DworkerType=$(WORKERTYPE_UAT) -Danypoint.platform.client_id=$(CLIENT_ID_UAT) -Danypoint.platform.client_secret=$(CLIENT_SECRET_UAT) -Dmule.env=$(MULE_ENV_UAT) -Dmule.key=$(ENCRYPTION_KEY_UAT)'
+
+
+  - stage: Deploy_To_PROD
+    dependsOn: CI
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    displayName: Deploy To PROD
+    jobs:
+      - deployment: CD
+        displayName: Deploy
+        environment: PROD
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - task: Cache@2
+                  displayName: 'Cache Maven Local Repo'
+                  inputs:
+                    key: 'mulesoft-devops-process'
+                    path: $(MAVEN_CACHE_FOLDER)
+                - task: DownloadSecureFile@1
+                  displayName: 'Download secure file'
+                  name: settings
+                  inputs:
+                    secureFile: 'settings.xml'
+                - task: Maven@3
+                  displayName: 'Deploy To PROD'
+                  condition: succeeded()
+                  inputs:
+                    mavenPomFile: 'pom.xml'
+                    publishJUnitResults: true
+                    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+                    mavenOptions: '-Xmx3072m'
+                    javaHomeOption: 'JDKVersion'
+                    jdkVersionOption: '1.8'
+                    jdkArchitectureOption: 'x64'
+                    goals: 'clean package deploy -DmuleDeploy -DskipTests -s $(settings.secureFilePath) $(MAVEN_OPTS) -Dnexus.username=$(NEXUS_USERNAME) -Dnexus.password=$(NEXUS_PASSWORD) -Danypoint.username=$(ANYPOINT_USERNAME) -Danypoint.password=$(ANYPOINT_PASSWORD) -DbusinessGroupId=$(BUSINESS_GROUP_ID) -Denvironment=$(ENVIRONMENT_PROD) -Dregion=$(REGION_PROD) -Dworkers=$(WORKERS_PROD) -DworkerType=$(WORKERTYPE_PROD) -Danypoint.platform.client_id=$(CLIENT_ID_PROD) -Danypoint.platform.client_secret=$(CLIENT_SECRET_PROD) -Dmule.env=$(MULE_ENV_PROD) -Dmule.key=$(ENCRYPTION_KEY_PROD)'

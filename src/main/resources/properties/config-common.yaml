@@ -1,0 +1,7 @@
+https:
+  port: "8082"
+
+
+retry:
+  maxRetries: "3"
+  milliSeconds: "10000"

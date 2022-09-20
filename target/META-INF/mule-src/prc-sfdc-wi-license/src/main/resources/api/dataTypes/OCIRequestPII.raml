@@ -1,0 +1,20 @@
+#%RAML 1.0 DataType
+type: object
+properties:
+  FirstName:
+    type: string
+    example: "string"
+    required: true
+  LastName:
+    type: string
+    example: "string"
+    required: true
+  Last4SSN:
+    type: string
+    example: "string"
+    required: true
+  DOB:
+    type: string
+    pattern: ^(((0[1-9]|1[012])\/(?!00|29)([012]\d)|(0[13-9]|1[012])\/(29|30)|(0[13578]|1[02])\/31)\/(18|19|20)\d{2}|02\/29\/((18|19|20)(0[48]|[2468][048]|[13579][26])|2000))$
+    example: 02/28/2022
+    required: true

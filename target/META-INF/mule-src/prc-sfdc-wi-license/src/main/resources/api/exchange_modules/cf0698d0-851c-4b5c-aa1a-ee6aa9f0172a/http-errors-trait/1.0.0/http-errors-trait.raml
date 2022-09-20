@@ -1,0 +1,51 @@
+#%RAML 1.0 Trait
+
+usage: This trait provides standard HTTP error response.
+description: Presents the extended error resonse.
+displayName: HTTP Errors
+
+responses:
+  400:
+    body:
+      application/json:
+        type: <<problemType>>
+  401:
+    body:
+      application/json:
+        type: <<problemType>>
+  403:
+    body:
+      application/json:
+        type: <<problemType>>
+  404:
+    body:
+      application/json:
+        type: <<problemType>>
+  405:
+    body:
+      application/json:
+        type: <<problemType>>
+  406:
+    body:
+      application/json:
+        type: <<problemType>>
+  415:
+    body:
+      application/json:
+        type: <<problemType>>
+  500:
+    body:
+      application/json:
+        type: <<problemType>>
+  501:
+    body:
+      application/json:
+        type: <<problemType>>
+  502:
+    body:
+      application/json:
+        type: <<problemType>>
+  503:
+    body:
+      application/json:
+        type: <<problemType>>

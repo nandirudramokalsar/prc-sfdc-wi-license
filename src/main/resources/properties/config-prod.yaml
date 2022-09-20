@@ -1,0 +1,20 @@
+api:
+  id: "18087424"
+  
+target:
+  dot: 
+    host: "https://prod-sys-sfdc-wi-license-v1.us-e2.cloudhub.io/api/dot-lic-cred-info"
+    client-id: "22b1c6b9735048c78ee50db80bb6b162"
+    respTimeout: "60000"
+  eibs:
+    host: "https://prod-sys-sfdc-wi-license-v1.us-e2.cloudhub.io/api/eibs-lic-cred-info"
+    client-id: "22b1c6b9735048c78ee50db80bb6b162"
+    respTimeout: "60000"
+  oci-name:
+    host: "https://prod-sys-sfdc-wi-license-v1.us-e2.cloudhub.io/api/oci-license-by-name"
+    client-id: "22b1c6b9735048c78ee50db80bb6b162"
+    respTimeout: "60000"
+  oci-num:
+    host: "https://prod-sys-sfdc-wi-license-v1.us-e2.cloudhub.io/api/oci-license-by-number"
+    client-id: "22b1c6b9735048c78ee50db80bb6b162"
+    respTimeout: "60000"

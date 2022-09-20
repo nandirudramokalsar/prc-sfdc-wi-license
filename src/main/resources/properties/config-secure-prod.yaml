@@ -1,0 +1,15 @@
+target:
+  dot:
+    client-secret: "![UmSJFDogDpmtgWlWbtmart3vc4udez+9hDIr7vNmtKQbjWIuVueqFg==]"
+    
+  eibs:
+    client-secret: "![UmSJFDogDpmtgWlWbtmart3vc4udez+9hDIr7vNmtKQbjWIuVueqFg==]"
+    
+  oci-name:
+    client-secret: "![UmSJFDogDpmtgWlWbtmart3vc4udez+9hDIr7vNmtKQbjWIuVueqFg==]"
+    
+  oci-num:
+    client-secret: "![UmSJFDogDpmtgWlWbtmart3vc4udez+9hDIr7vNmtKQbjWIuVueqFg==]"
+    
+keystore:
+  password: "![]"
