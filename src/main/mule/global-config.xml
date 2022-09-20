@@ -51,7 +51,7 @@ if(error.errorMessage.payload != null) error.errorMessage.payload
 else {
     statusCode: vars.httpStatus,
     errorType: error.errorType.asString,
-    message: if(error.errorType.asString ~= "MULE:EXPRESSION") "DataWeave Failure" else error.description,    
+    message: if(error.errorType.asString ~= "MULE:EXPRESSION") "DataWeave Failure Error" else error.description,    
     appName: app.name,
     uuid: vars.uuid
 }]]></ee:set-payload>
